@@ -1,12 +1,6 @@
-import random
 import pygame
 from Bullets import Bullet
 from pygame.time import Clock
-
-
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 700
-clock = Clock
 
 
 class Snake(pygame.sprite.Sprite):
@@ -23,6 +17,7 @@ class Snake(pygame.sprite.Sprite):
         self.dash_distance = 10
         self.cooldown_time = 0
         self.cooldown_duration = 0
+        self.health = 100
 
     def update(self):
         keys = pygame.key.get_pressed()  # get the current state of the keyboard
@@ -91,21 +86,20 @@ class Snake(pygame.sprite.Sprite):
 
             self.cooldown_time = self.cooldown_duration  # Start cooldown after a dash
 
-
-
-
     def shoot_bullet(self, mouse_pos, special_attack=False):
-        if not special_attack:   # Placeholder for creating a regular bullet at the snake's position
-            bullet = Bullet(self.rect.centerx, self.rect.centery, 0, -5)  # Example: Bullet moving  upwards
-            self.bullets.add(bullet)  # Add the bullet to the bullets group
-            print("Shooting regular bullet towards position:", mouse_pos)
-        else:
-            if self.special_attack_available:
-                print("Performing special attack at position:", mouse_pos)
-                # Add special attack logic here
-                self.special_attack_available = False
-            else:
-                print("Special attack not available")
+        if not special_attack:
+            mouse_pos = pygame.mouse.get_pos()
+            # calculate direction vector (mouse position - snake`s center)
+            direction_x = mouse_pos[0] - self.rect.centerx
+            direction_y = mouse_pos[1] - self.rect.centery
+            # Normalize  the direction vector (optional for consistent speed)
+            magnitude = (direction_x ** 2 + direction_y ** 2) ** 0.5  # calculate magnitude (length)
+            if magnitude > 0:  # Avoid division by zero
+                direction_x /= magnitude
+                direction_y /= magnitude
+            # create bullet with calculated direction
+            bullet = Bullet(self.rect.centerx, self.rect.centery, direction_x, direction_y)
+            self.bullets.add(bullet)
 
     def collect_special_item(self):
         self.special_attack_available = True
@@ -119,26 +113,14 @@ class Snake(pygame.sprite.Sprite):
             print("Special attack not available")
 
 
-class Special_item(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface((20, 20))  # create a placeholder image for the special item
-        self.image.fill((255, 0, 0))
-        self.rect = self.image.get_rect()
-        self.spawn()
+pygame.init()
 
-    def spawn(self):
-        self.rect.x = random.randint(0, 780)  # adjust the range according to the screen size
-        self.rect.y = random.randint(0, 580)
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 800
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Snake Game")
+clock = Clock()
 
-def check_collision(self, screen_width, screen_height):
-    # ... (existing collision logic for top and bottom walls)
 
-    # Check for collisions with left and right edges
-    if self.rect.left < 0 or self.rect.right > screen_width:
-        # Handle the collision (e.g., stop movement, bounce back)
-        return True  # Indicate collision
-
-    return False  # No collision
-
+pygame.quit()
 
